@@ -51,13 +51,14 @@ const COD_SITE = {
       badge: 'S4'
     }
   },
+
   nav: [
     { href: 'index.html', key: 'home', label: 'News' },
     { href: 'atlas.html', key: 'atlas', label: 'Atlas' },
-    { href: 'mw.html', key: 'mw', label: 'MW' },
-    { href: 'mwii.html', key: 'mwii', label: 'MWII' },
-    { href: 'mwiii.html', key: 'mwiii', label: 'MWIII' },
-    { href: 'vg.html', key: 'vg', label: 'VG' }
+    { href: 'mw.html', key: 'mw', label: 'MW', icon: './images/ui/MW-icon.png' },
+    { href: 'mwii.html', key: 'mwii', label: 'MWII', icon: './images/ui/MWII-icon.png' },
+    { href: 'mwiii.html', key: 'mwiii', label: 'MWIII', icon: './images/ui/MWIII-icon.png' },
+    { href: 'vg.html', key: 'vg', label: 'VG', icon: './images/ui/VG-icon.png' }
   ]
 };
 
@@ -65,9 +66,17 @@ function renderNav(activeKey = 'home') {
   const nav = document.getElementById('site-nav');
   if (!nav) return;
 
-  const links = COD_SITE.nav.map(item => `
-    <a class="nav-link-item ${item.key === activeKey ? 'active' : ''}" href="${item.href}">${item.label}</a>
-  `).join('');
+  const renderLink = (item) => `
+    <a class="nav-link-item nav-link-${item.key} ${item.key === activeKey ? 'active' : ''}" href="${item.href}">
+      ${
+        item.icon
+          ? `<img class="nav-game-icon" src="${item.icon}" alt="${item.label}">`
+          : `<span>${item.label}</span>`
+      }
+    </a>
+  `;
+
+  const links = COD_SITE.nav.map(renderLink).join('');
 
   nav.innerHTML = `
     <div class="cod-nav-inner">
@@ -88,8 +97,12 @@ function renderNav(activeKey = 'home') {
 
       <button class="mobile-toggle" id="mobile-toggle" aria-label="Open navigation">☰</button>
     </div>
+
     <div class="mobile-menu" id="mobile-menu">
-      <div class="mobile-stack">${links}<a class="nav-cta" href="atlas.html">Atlas Home</a></div>
+      <div class="mobile-stack">
+        ${links}
+        <a class="nav-cta" href="atlas.html">Atlas Home</a>
+      </div>
     </div>
   `;
 
@@ -459,10 +472,18 @@ async function renderPage(pageKey) {
 
     const cards = document.getElementById('overview-cards');
     const h2s = [...content.querySelectorAll('h2')].slice(0, 3);
-    cards.innerHTML = h2s.map(h => {
+    const featureImages = [
+      'https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blog/body/codm/s1-2026/CODM-S1ANNOUNCE-TOUT.jpg',
+      'https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blog/guides/mwiii/maps/bait/COD-PLAY-MAPS-CORE-BAIT-TOUT.webp',
+      'https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blog/hero/vgd/VGD-S5-MAP-BEHEADED-TOUT.jpg'
+    ];
+
+    cards.innerHTML = h2s.map((h, i) => {
       const p = h.nextElementSibling ? extractPreview(h.nextElementSibling.outerHTML) : page.desc;
+      const image = featureImages[i % featureImages.length];
+
       return `
-        <article class="feature-card" style="--card-image:url('${page.hero}')">
+        <article class="feature-card" style="--card-image:url('${image}')">
           <div class="feature-inner">
             <div class="feature-kicker">${page.badge}</div>
             <div class="feature-title">${h.textContent}</div>
@@ -565,21 +586,21 @@ function renderHome() {
           </div>
         </div>
         <div class="overview-grid">
-          <article class="feature-card" style="--card-image:url('https://cdn2.steamgriddb.com/hero/8b4bcaeccf864f7508097af0d97429ca.jpg')">
+          <article class="feature-card" style="--card-image:url('https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blog/hero/mwii/MWII-S05R-DRCZONE1-TOUT.jpg')">
             <div class="feature-inner">
               <div class="feature-kicker">Visual Upgrade</div>
               <div class="feature-title">Blog style layout</div>
               <p class="feature-text">Full-width banners, darker overlays, and overall better design inspired by the official COD site</p>
             </div>
           </article>
-          <article class="feature-card" style="--card-image:url('https://cdn2.steamgriddb.com/hero/4971ea42e67e73f2e0dc2546ac114455.jpg')">
+          <article class="feature-card" style="--card-image:url('https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blog/hero/bo6/BO6--ANTITOX-TOUT.jpg')">
             <div class="feature-inner">
               <div class="feature-kicker">Utility Upgrade</div>
               <div class="feature-title">Copyable Commands</div>
               <p class="feature-text">The ability to copy commands with a single button lol</p>
             </div>
           </article>
-          <article class="feature-card" style="--card-image:url('https://cdn2.steamgriddb.com/hero/52ec3baefcf93a558d994e1bcd3b5c3d.jpg')">
+          <article class="feature-card" style="--card-image:url('https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blog/hero/vgd/VGD-S5-MAP-BEHEADED-TOUT.jpg')">
             <div class="feature-inner">
               <div class="feature-kicker">Structure Upgrade</div>
               <div class="feature-title">Information Side navbar</div>
