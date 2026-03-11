@@ -122,12 +122,12 @@ function rootPrefix() {
 
 function pageUrl(key) {
   const map = {
-    home: 'index.html',
-    atlas: 'Atlas/atlas.html',
-    mw: 'MW19/mw.html',
-    mwii: 'MWII/mwii.html',
-    mwiii: 'MWIII/mwiii.html',
-    vg: 'VG/vg.html'
+    home: '',
+    atlas: 'Atlas/',
+    mw: 'MW/',
+    mwii: 'MWII/',
+    mwiii: 'MWIII/',
+    vg: 'VG/'
   };
   return rootPrefix() + map[key];
 }

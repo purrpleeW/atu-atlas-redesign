@@ -1227,3 +1227,19 @@ table img {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(300%); }
 }
+
+html, body {
+  cursor: url('../cursors/jup.cur'), auto;
+}
+
+a,
+button,
+.nav-link-item,
+.nav-cta,
+.game-card,
+.feature-card,
+.copy-btn,
+.expand-btn,
+.command-info-btn {
+  cursor: url('../cursors/jup-select.cur'), pointer;
+}
