@@ -53,12 +53,12 @@ const COD_SITE = {
   },
 
   nav: [
-    { href: 'index.html', key: 'home', label: 'News' },
-    { href: 'atlas.html', key: 'atlas', label: 'Atlas' },
-    { href: 'mw.html', key: 'mw', label: 'MW', icon: './images/ui/MW-icon.png' },
-    { href: 'mwii.html', key: 'mwii', label: 'MWII', icon: './images/ui/MWII-icon.png' },
-    { href: 'mwiii.html', key: 'mwiii', label: 'MWIII', icon: './images/ui/MWIII-icon.png' },
-    { href: 'vg.html', key: 'vg', label: 'VG', icon: './images/ui/VG-icon.png' }
+    { key: 'home', label: 'News' },
+    { key: 'atlas', label: 'Atlas' },
+    { key: 'mw', label: 'MW', icon: 'images/ui/MW-icon.png' },
+    { key: 'mwii', label: 'MWII', icon: 'images/ui/MWII-icon.png' },
+    { key: 'mwiii', label: 'MWIII', icon: 'images/ui/MWIII-icon.png' },
+    { key: 'vg', label: 'VG', icon: 'images/ui/VG-icon.png' }
   ]
 };
 
@@ -67,15 +67,14 @@ function renderNav(activeKey = 'home') {
   if (!nav) return;
 
   const renderLink = (item) => `
-    <a class="nav-link-item nav-link-${item.key} ${item.key === activeKey ? 'active' : ''}" href="${item.href}">
+    <a class="nav-link-item nav-link-${item.key} ${item.key === activeKey ? 'active' : ''}" href="${pageUrl(item.key)}">
       ${
         item.icon
-          ? `<img class="nav-game-icon" src="${item.icon}" alt="${item.label}">`
+          ? `<img class="nav-game-icon" src="${assetUrl(item.icon)}" alt="${item.label}">`
           : `<span>${item.label}</span>`
       }
     </a>
   `;
-
   const links = COD_SITE.nav.map(renderLink).join('');
 
   nav.innerHTML = `
@@ -92,7 +91,7 @@ function renderNav(activeKey = 'home') {
 
       <div class="nav-actions">
         <a class="nav-link-item" href="#main-content">Skip to Intel</a>
-        <a class="nav-cta" href="atlas.html">Atlas Home</a>
+        <a class="nav-cta" href="${pageUrl('atlas')}">Atlas Home</a>
       </div>
 
       <button class="mobile-toggle" id="mobile-toggle" aria-label="Open navigation">☰</button>
@@ -111,6 +110,30 @@ function renderNav(activeKey = 'home') {
   if (toggle && menu) {
     toggle.addEventListener('click', () => menu.classList.toggle('open'));
   }
+}
+
+function isHomePage() {
+  return document.getElementById('home-root') !== null;
+}
+
+function rootPrefix() {
+  return isHomePage() ? './' : '../';
+}
+
+function pageUrl(key) {
+  const map = {
+    home: 'index.html',
+    atlas: 'Atlas/atlas.html',
+    mw: 'MW19/mw.html',
+    mwii: 'MWII/mwii.html',
+    mwiii: 'MWIII/mwiii.html',
+    vg: 'VG/vg.html'
+  };
+  return rootPrefix() + map[key];
+}
+
+function assetUrl(path) {
+  return rootPrefix() + path.replace(/^\.?\//, '');
 }
 
 function slugify(text) {
@@ -132,11 +155,15 @@ function escapeHtml(text) {
 }
 
 function preprocessMarkdown(md) {
+  const prefix = rootPrefix();
+
   return md
-    .replace(/^!!! note\s+(.+)$/gm, (_m, title) => `\n### Note\n`)
-    .replace(/^!!! info\s+(.+)$/gm, (_m, title) => `\n### Info\n`)
+    .replace(/^!!! note\s+(.+)$/gm, () => `\n### Note\n`)
+    .replace(/^!!! info\s+(.+)$/gm, () => `\n### Info\n`)
     .replace(/\{\d+%:\d+%\}/g, '')
-    .replace(/\{\d+px:\d+px\}/g, '');
+    .replace(/\{\d+px:\d+px\}/g, '')
+    .replace(/!\[\]\(\.\/images\//g, `![](${prefix}images/`)
+    .replace(/\]\(\.\/images\//g, `](${prefix}images/`);
 }
 
 function transformRenderedContent(container) {
@@ -491,8 +518,8 @@ async function renderPage(pageKey) {
           <div class="promo-panel">
             <div class="note-title">Quick Actions</div>
             <div class="quick-list">
-              <a href="index.html">Back to Home</a>
-              <a href="atlas.html">Open Atlas Hub</a>
+              <a href="${pageUrl('home')}">Back to Home</a>
+              <a href="${pageUrl('atlas')}">Open Atlas Hub</a>
               <a href="#main-content">Scroll to Intel</a>
             </div>
           </div>
@@ -594,7 +621,7 @@ function renderHome() {
   if (!root) return;
 
   const gameCards = Object.values(COD_SITE.pages).map(page => `
-    <a class="game-card" href="${page.key}.html" style="display:block;">
+    <a class="game-card" href="${pageUrl(page.key)}" style="display:block;">
       <div class="game-thumb" style="--card-image:url('${page.hero}')">
         <div class="game-tag">${page.title}</div>
       </div>
@@ -613,7 +640,7 @@ function renderHome() {
           <div class="hero-jumps">
             <a href="#games">Game Archives</a>
             <a href="#features">Site Features</a>
-            <a href="atlas.html">Open Atlas</a>
+            <a href="${pageUrl('atlas')}">Open Atlas</a>
           </div>
         </aside>
         <div class="hero-copy">
@@ -622,7 +649,7 @@ function renderHome() {
           <p class="hero-desc">A new blog styled redesign of the original Atu Atlas</p>
           <div class="hero-actions">
             <a href="#games" class="btn-cod">Browse Games</a>
-            <a href="atlas.html" class="btn-cod-alt">Open Intel Hub</a>
+            <a href="${pageUrl('atlas')}" class="btn-cod-alt">Open Intel Hub</a>
           </div>
         </div>
       </div>
