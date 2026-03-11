@@ -226,24 +226,6 @@ function transformRenderedContent(container) {
     li.replaceWith(card);
   });
 
-  [...container.querySelectorAll('.command-copy')].forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const value = btn.getAttribute('data-copy');
-      try {
-        await navigator.clipboard.writeText(value);
-        const old = btn.innerHTML;
-        btn.innerHTML = '<span class="copy-btn-text">Copied</span>';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = old;
-          btn.classList.remove('copied');
-        }, 1200);
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  });
-
   [...container.querySelectorAll('.command-info-btn')].forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.getAttribute('data-info-target');
@@ -435,6 +417,44 @@ function setupExpandableCommands(container) {
   });
 }
 
+function setupCopyButtons(container) {
+  [...container.querySelectorAll('.command-copy')].forEach(btn => {
+    if (btn.dataset.copyBound === 'true') return;
+    btn.dataset.copyBound = 'true';
+
+    btn.addEventListener('click', async () => {
+      const value = btn.getAttribute('data-copy');
+      try {
+        await navigator.clipboard.writeText(value);
+
+        const textNode = btn.querySelector('.copy-btn-text');
+        if (textNode) {
+          const old = textNode.textContent;
+          textNode.textContent = 'Copied!';
+          btn.classList.add('copied');
+
+          setTimeout(() => {
+            textNode.textContent = old;
+            btn.classList.remove('copied');
+          }, 1400);
+        } else {
+          const old = btn.textContent;
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('copied');
+          }, 1400);
+        }
+      } catch {
+        const textNode = btn.querySelector('.copy-btn-text');
+        if (textNode) textNode.textContent = 'Copy failed?';
+      }
+    });
+  });
+}
+
 
 function buildTOC(container) {
   const toc = document.getElementById('toc');
@@ -564,6 +584,7 @@ async function renderPage(pageKey) {
     transformRenderedContent(content);
     convertEventTables(content);
     setupExpandableCommands(content);
+    setupCopyButtons(content);
     buildTOC(content);
     hideLoader();
 
