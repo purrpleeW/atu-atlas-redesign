@@ -124,7 +124,7 @@ function pageUrl(key) {
   const map = {
     home: '',
     atlas: 'Atlas/',
-    mw: 'MW/',
+    mw: 'MW19/',
     mwii: 'MWII/',
     mwiii: 'MWIII/',
     vg: 'VG/'
