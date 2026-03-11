@@ -146,32 +146,119 @@ function transformRenderedContent(container) {
     if (id) h.id = id;
   });
 
-  [...container.querySelectorAll('li')].forEach(li => {
+  [...container.querySelectorAll('li')].forEach((li, index) => {
     const code = li.querySelector('code');
     if (!code) return;
-    const clone = li.cloneNode(true);
-    const text = clone.textContent.trim();
+
     const command = code.textContent.trim();
-    if (!text.startsWith(command)) return;
     if (command.length < 4) return;
 
-    const remainder = text.slice(command.length).trim();
+    const clone = li.cloneNode(true);
+
+    const codeInClone = clone.querySelector('code');
+    if (codeInClone) codeInClone.remove();
+
+    const description = clone.textContent.trim();
+
+    const infoId = `command-info-${index}`;
+    const hasDescription = !!description;
+
     const card = document.createElement('div');
     card.className = 'command-card';
     card.innerHTML = `
       <div class="command-main">
-        <div class="command-label">Command</div>
+        <div class="command-label-row">
+          <div class="command-label">Command</div>
+          ${
+            hasDescription
+              ? `
+                <button
+                  class="command-info-btn"
+                  type="button"
+                  aria-label="Show command info"
+                  aria-expanded="false"
+                  aria-controls="${infoId}"
+                  data-info-target="${infoId}">
+                  i
+                </button>
+              `
+              : ''
+          }
+        </div>
+
         <div class="command-text-wrap">
           <div class="command-text">${escapeHtml(command)}</div>
-          <button class="expand-btn" type="button" aria-expanded="false">Show more</button>
         </div>
-        ${remainder ? `<div class="command-extra">${escapeHtml(remainder)}</div>` : ''}
+
+        ${
+          hasDescription
+            ? `
+              <div class="command-info-pop" id="${infoId}" hidden>
+                <div class="command-info-title">Info</div>
+                <div class="command-info-body">${escapeHtml(description)}</div>
+              </div>
+            `
+            : ''
+        }
       </div>
+
       <button class="copy-btn command-copy" data-copy="${escapeHtml(command)}" aria-label="Copy command">
         <span class="copy-btn-text">Copy</span>
       </button>
     `;
+
     li.replaceWith(card);
+  });
+
+  [...container.querySelectorAll('.command-copy')].forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const value = btn.getAttribute('data-copy');
+      try {
+        await navigator.clipboard.writeText(value);
+        const old = btn.innerHTML;
+        btn.innerHTML = '<span class="copy-btn-text">Copied</span>';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = old;
+          btn.classList.remove('copied');
+        }, 1200);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  [...container.querySelectorAll('.command-info-btn')].forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-info-target');
+      const pop = document.getElementById(targetId);
+      if (!pop) return;
+
+      const isOpen = !pop.hasAttribute('hidden');
+
+      [...container.querySelectorAll('.command-info-pop')].forEach(el => {
+        el.setAttribute('hidden', '');
+      });
+      [...container.querySelectorAll('.command-info-btn')].forEach(el => {
+        el.setAttribute('aria-expanded', 'false');
+      });
+
+      if (!isOpen) {
+        pop.removeAttribute('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.closest('.command-card')) return;
+
+    [...container.querySelectorAll('.command-info-pop')].forEach(el => {
+      el.setAttribute('hidden', '');
+    });
+    [...container.querySelectorAll('.command-info-btn')].forEach(el => {
+      el.setAttribute('aria-expanded', 'false');
+    });
   });
 
   [...container.querySelectorAll('p code')].forEach(code => {
@@ -186,24 +273,6 @@ function transformRenderedContent(container) {
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
-
-  [...container.querySelectorAll('.command-copy')].forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const value = btn.getAttribute('data-copy');
-      try {
-        await navigator.clipboard.writeText(value);
-        const old = btn.textContent;
-        btn.textContent = 'Copied';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = old;
-          btn.classList.remove('copied');
-        }, 1400);
-      } catch {
-        btn.textContent = 'Copy failed';
-      }
     });
   });
 }
