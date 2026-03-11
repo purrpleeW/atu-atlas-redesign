@@ -171,33 +171,22 @@ function transformRenderedContent(container) {
           <div class="command-label">Command</div>
           ${
             hasDescription
-              ? `
-                <button
-                  class="command-info-btn"
-                  type="button"
-                  aria-label="Show command info"
-                  aria-expanded="false"
-                  aria-controls="${infoId}"
-                  data-info-target="${infoId}">
-                  i
-                </button>
-              `
+              ? `<button class="command-info-btn" type="button" aria-expanded="false" data-info-target="${infoId}">i</button>`
               : ''
           }
         </div>
 
         <div class="command-text-wrap">
           <div class="command-text">${escapeHtml(command)}</div>
+          <button class="expand-btn" type="button" aria-expanded="false">Show more</button>
         </div>
 
         ${
           hasDescription
-            ? `
-              <div class="command-info-pop" id="${infoId}" hidden>
+            ? `<div class="command-info-pop" id="${infoId}" hidden>
                 <div class="command-info-title">Info</div>
                 <div class="command-info-body">${escapeHtml(description)}</div>
-              </div>
-            `
+              </div>`
             : ''
         }
       </div>
@@ -242,6 +231,18 @@ function transformRenderedContent(container) {
       [...container.querySelectorAll('.command-info-btn')].forEach(el => {
         el.setAttribute('aria-expanded', 'false');
       });
+
+      [...container.querySelectorAll('.expand-btn')].forEach(btn => {
+      btn.addEventListener('click', () => {
+        const wrap = btn.closest('.command-text-wrap');
+        if (!wrap) return;
+
+        wrap.classList.toggle('expanded');
+        const expanded = wrap.classList.contains('expanded');
+        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        btn.textContent = expanded ? 'Show less' : 'Show more';
+      });
+    });
 
       if (!isOpen) {
         pop.removeAttribute('hidden');
